@@ -35,6 +35,14 @@ vibesafe scan /path/to/project --skip-tier3 -f json
 # Save report to file
 vibesafe scan /path/to/project --skip-tier3 -o report.md
 
+# Scan a public GitHub repository (no clone or zip needed)
+vibesafe scan-github owner/repo --skip-tier3
+
+# Scan a specific branch or private repo
+vibesafe scan-github https://github.com/owner/repo --ref main -f json
+export GITHUB_TOKEN=ghp_your_token_here   # required for private repos
+vibesafe scan-github owner/private-repo --token "$GITHUB_TOKEN"
+
 # Verbose logging
 vibesafe scan /path/to/project --skip-tier3 -v
 ```
@@ -78,7 +86,15 @@ zip -r project.zip ./my-app
 curl -X POST http://localhost:8000/api/scans \
   -H "Authorization: Bearer vsk_your_key" \
   -F "project=@project.zip" -F "name=my-app" -F "skip_tier3=true"
+
+# Scan a GitHub repository via the API
+curl -X POST http://localhost:8000/api/scans/github \
+  -H "Authorization: Bearer vsk_your_key" \
+  -F "repo=owner/repo" -F "name=my-app" -F "skip_tier3=true"
 ```
+
+For private repositories, set `GITHUB_TOKEN` on the server or pass
+`github_token` in the form body.
 
 ### Plans
 
@@ -97,6 +113,7 @@ curl -X POST http://localhost:8000/api/scans \
 | `STRIPE_PRICE_ID` | Stripe price for Pro plan | unset |
 | `STRIPE_WEBHOOK_SECRET` | Webhook signature secret | unset |
 | `VIBESAFE_APP_URL` | Public base URL for redirects | `http://localhost:8000` |
+| `GITHUB_TOKEN` | GitHub PAT for private repo scans (CLI + SaaS) | unset (public repos only) |
 
 Billing degrades gracefully: with no `STRIPE_SECRET_KEY`, the app runs
 free-tier only and upgrade endpoints return a clear "not configured" error.
@@ -197,5 +214,5 @@ vibesafe/
     generator.py       # Deduplication + summary
     formatter.py       # Markdown/JSON output
     templates/         # Report templates
-  utils/               # File I/O, logging, git, token counting
+  utils/               # File I/O, logging, git, token counting, archives, GitHub fetch
 ```

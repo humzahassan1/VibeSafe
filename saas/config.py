@@ -82,6 +82,7 @@ class Settings:
     stripe_price_id: str | None
     app_base_url: str
     max_upload_mb: int
+    github_token: str | None
 
 
 def load_settings() -> Settings:
@@ -98,6 +99,7 @@ def load_settings() -> Settings:
         stripe_price_id=os.environ.get("STRIPE_PRICE_ID"),
         app_base_url=os.environ.get("VIBESAFE_APP_URL", "http://localhost:8000"),
         max_upload_mb=int(os.environ.get("VIBESAFE_MAX_UPLOAD_MB", "25")),
+        github_token=os.environ.get("GITHUB_TOKEN"),
     )
 
 

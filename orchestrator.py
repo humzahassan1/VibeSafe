@@ -98,6 +98,50 @@ def run(project_path: str, options: ScanOptions | None = None) -> str:
     return report
 
 
+def run_github(
+    repo: str,
+    options: ScanOptions | None = None,
+    token: str | None = None,
+    ref: str | None = None,
+) -> str:
+    """Fetch a GitHub repository and run the scan pipeline on it.
+
+    Args:
+        repo: Repository slug or URL (``owner/repo``, ``owner/repo@ref``, or github.com URL).
+        options: Scan configuration options.
+        token: Optional GitHub token (falls back to ``GITHUB_TOKEN`` env).
+        ref: Optional branch/tag/commit override (applied after parsing ``repo``).
+
+    Returns:
+        Formatted report string.
+
+    Raises:
+        SystemExit: If the repository cannot be fetched.
+    """
+    from utils.github import GitHubError, RepoRef, fetch_repo, parse_repo_ref
+
+    if options is None:
+        options = ScanOptions()
+
+    if token is None:
+        import os
+        token = os.environ.get("GITHUB_TOKEN")
+
+    parsed = parse_repo_ref(repo)
+    if ref:
+        parsed = RepoRef(parsed.owner, parsed.repo, ref)
+
+    slug = f"{parsed.owner}/{parsed.repo}"
+    if parsed.ref:
+        slug = f"{slug}@{parsed.ref}"
+
+    try:
+        with fetch_repo(slug, token=token) as local_path:
+            return run(local_path, options)
+    except GitHubError as exc:
+        raise SystemExit(str(exc)) from exc
+
+
 def _run_tier1(context: ProjectContext, config: Config) -> list[Finding]:
     """Run Tier 1 scan with error handling.
 

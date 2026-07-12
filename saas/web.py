@@ -158,6 +158,18 @@ def render_dashboard(
   </div>
 
   <div class="card">
+    <h2>Scan a GitHub repo</h2>
+    <form class="inline" onsubmit="return runGithubScan(event)">
+      <input name="repo" placeholder="owner/repo or github.com URL" required style="min-width: 14rem;">
+      <input name="name" placeholder="Project name (optional)">
+      <button type="submit">Scan repo</button>
+    </form>
+    <p class="muted">Public repos work without a token. Private repos need <code>GITHUB_TOKEN</code>
+      configured on the server.</p>
+    <pre id="gh-result" class="muted"></pre>
+  </div>
+
+  <div class="card">
     <h2>Scan history</h2>
     <table>
       <thead><tr><th>Project</th><th>Framework</th><th>Result</th><th>Total</th><th>When</th></tr></thead>
@@ -172,6 +184,19 @@ def render_dashboard(
       out.textContent = 'Scanning…';
       const data = new FormData(e.target);
       const res = await fetch('/api/scans', {{ method: 'POST', body: data }});
+      const j = await res.json().catch(() => ({{}}));
+      if (res.ok) {{
+        out.textContent = 'Done: ' + JSON.stringify(j.summary, null, 2);
+        setTimeout(() => window.location.reload(), 1200);
+      }} else {{ out.textContent = 'Error: ' + (j.detail || 'scan failed'); }}
+      return false;
+    }}
+    async function runGithubScan(e) {{
+      e.preventDefault();
+      const out = document.getElementById('gh-result');
+      out.textContent = 'Fetching and scanning…';
+      const data = new FormData(e.target);
+      const res = await fetch('/api/scans/github', {{ method: 'POST', body: data }});
       const j = await res.json().catch(() => ({{}}));
       if (res.ok) {{
         out.textContent = 'Done: ' + JSON.stringify(j.summary, null, 2);

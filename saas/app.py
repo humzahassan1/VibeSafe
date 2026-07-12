@@ -38,7 +38,7 @@ from saas.billing import (
 )
 from saas.config import load_settings, stripe_enabled
 from saas.database import ApiKey, Scan, User, get_session, init_db
-from saas.scans import ScanError, run_scan_from_archive
+from saas.scans import ScanError, run_scan_from_archive, run_scan_from_github
 from saas.usage import can_run_scan, get_usage_status
 from saas.web import render_dashboard, render_landing
 
@@ -306,6 +306,60 @@ async def create_scan(
     finally:
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
+
+    return JSONResponse(
+        {
+            "scan_id": result.scan_id,
+            "summary": result.summary,
+            "findings": result.report_json.get("findings", []),
+        }
+    )
+
+
+@app.post("/api/scans/github")
+def create_github_scan(
+    request: Request,
+    repo: str = Form(...),
+    name: str = Form(""),
+    skip_tier3: bool = Form(True),
+    github_token: str = Form(""),
+    session: Session = Depends(get_session),
+) -> JSONResponse:
+    """Fetch a GitHub repository and scan it.
+
+    Accepts either a session cookie or an API key (Authorization: Bearer).
+
+    Args:
+        request: The incoming request.
+        repo: Repository slug or URL.
+        name: Display name for the scan.
+        skip_tier3: Whether to skip LLM analysis.
+        github_token: Optional per-request GitHub token.
+        session: Database session.
+
+    Returns:
+        JSON with the scan ID and summary.
+    """
+    user = _resolve_user(request, session)
+
+    allowed, reason = can_run_scan(session, user)
+    if not allowed:
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail=reason)
+
+    project_name = name.strip() or repo.rstrip("/").split("/")[-1].replace(".git", "")
+    token = github_token.strip() or None
+
+    try:
+        result = run_scan_from_github(
+            session,
+            user,
+            repo,
+            project_name=project_name,
+            skip_tier3=skip_tier3,
+            token=token,
+        )
+    except ScanError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     return JSONResponse(
         {
