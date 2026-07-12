@@ -3,7 +3,6 @@
   "installCommand": "cd landing && npm install",
   "buildCommand": "cd landing && npm run build",
   "outputDirectory": "landing/dist",
-  "framework": "vite",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
