@@ -109,13 +109,6 @@ export function Hero({ activeSection }: HeroProps) {
           </a>
         </div>
       </div>
-
-      <div className="absolute bottom-10 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-3">
-        <span className="text-xs uppercase tracking-[0.2em] text-muted">Scroll</span>
-        <div className="relative h-10 w-px overflow-hidden bg-stroke">
-          <div className="absolute left-0 top-0 h-4 w-full accent-gradient animate-scroll-down" />
-        </div>
-      </div>
     </section>
   )
 }
