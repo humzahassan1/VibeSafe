@@ -1,0 +1,16 @@
+Analyze the following code for AI-specific security vulnerabilities.
+
+Focus on:
+- Prompt injection — is user input passed directly into LLM prompts without sanitization? (SEC-027)
+- Missing rate limiting on AI-powered endpoints (SEC-028)
+- Exposed AI errors — are internal prompts or LLM error details leaked to users? (SEC-029)
+- Ungated AI tool actions — can the AI perform destructive actions without user confirmation? (SEC-030)
+
+File: {{ file_path }}
+Framework: {{ framework }}
+
+```
+{{ file_content }}
+```
+
+Return a JSON array of findings.

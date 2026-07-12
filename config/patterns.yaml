@@ -1,0 +1,263 @@
+# Tier 1 regex patterns for secret detection, dangerous code, and config issues.
+# Each pattern links to a rule_id in rules.yaml.
+
+api_keys:
+  - name: aws_access_key
+    regex: '(?<![A-Z0-9])(AKIA[0-9A-Z]{16})(?![A-Z0-9])'
+    rule_id: SEC-001
+    file_extensions: ["*"]
+
+  - name: stripe_live_secret
+    regex: 'sk_live_[a-zA-Z0-9]{24,}'
+    rule_id: SEC-001
+    file_extensions: ["*"]
+
+  - name: stripe_live_publishable
+    regex: 'pk_live_[a-zA-Z0-9]{24,}'
+    rule_id: SEC-001
+    file_extensions: ["*"]
+
+  - name: openai_api_key
+    regex: 'sk-[a-zA-Z0-9]{20,}'
+    rule_id: SEC-001
+    file_extensions: ["*"]
+
+  - name: google_api_key
+    regex: 'AIza[0-9A-Za-z_-]{35}'
+    rule_id: SEC-001
+    file_extensions: ["*"]
+
+  - name: firebase_api_key
+    regex: 'AIza[0-9A-Za-z_-]{35}'
+    rule_id: SEC-001
+    file_extensions: ["*"]
+
+  - name: supabase_key
+    regex: 'eyJ[a-zA-Z0-9_-]{40,}\.eyJ[a-zA-Z0-9_-]{40,}\.[a-zA-Z0-9_-]{40,}'
+    rule_id: SEC-001
+    file_extensions: ["*"]
+
+  - name: github_token
+    regex: '(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36,}'
+    rule_id: SEC-001
+    file_extensions: ["*"]
+
+  - name: generic_secret_assignment
+    regex: '(?:secret|api_?key|apikey|auth_?token)\s*[=:]\s*["\x27][a-zA-Z0-9_\-/.]{8,}["\x27]'
+    rule_id: SEC-001
+    file_extensions: ["*"]
+
+credentials:
+  - name: hardcoded_password
+    regex: '(?:password|passwd|pwd)\s*[=:]\s*["\x27][^"\x27]{3,}["\x27]'
+    rule_id: SEC-001
+    file_extensions: ["*"]
+    exclude_patterns: ['os\.environ', 'process\.env', 'getenv', 'env\(', 'config\[', 'ENV\[']
+
+  - name: hardcoded_token
+    regex: '(?:token|access_token|auth_token)\s*[=:]\s*["\x27][a-zA-Z0-9_\-/.]{8,}["\x27]'
+    rule_id: SEC-001
+    file_extensions: ["*"]
+    exclude_patterns: ['os\.environ', 'process\.env', 'getenv', 'env\(']
+
+  - name: connection_string
+    regex: '(?:postgres|mysql|mongodb|redis|amqp)(?:ql)?://[^\s"''\]>]{10,}'
+    rule_id: SEC-004
+    file_extensions: ["*"]
+    exclude_patterns: ['os\.environ', 'process\.env', 'getenv', 'env\(', 'example\.com', 'localhost']
+
+dangerous_functions:
+  - name: eval_usage
+    regex: '\beval\s*\('
+    rule_id: SEC-022
+    file_extensions: [".js", ".ts", ".jsx", ".tsx", ".py"]
+
+  - name: exec_usage_python
+    regex: '\bexec\s*\('
+    rule_id: SEC-022
+    file_extensions: [".py"]
+
+  - name: innerhtml_assignment
+    regex: '\.innerHTML\s*='
+    rule_id: SEC-022
+    file_extensions: [".js", ".ts", ".jsx", ".tsx"]
+
+  - name: document_write
+    regex: 'document\.write\s*\('
+    rule_id: SEC-022
+    file_extensions: [".js", ".ts", ".jsx", ".tsx", ".html"]
+
+  - name: shell_true_python
+    regex: 'subprocess\.\w+\(.*shell\s*=\s*True'
+    rule_id: SEC-022
+    file_extensions: [".py"]
+
+  - name: child_process_exec
+    regex: 'child_process\.exec\s*\('
+    rule_id: SEC-022
+    file_extensions: [".js", ".ts"]
+
+  - name: os_system_python
+    regex: 'os\.system\s*\('
+    rule_id: SEC-022
+    file_extensions: [".py"]
+
+  - name: os_popen_python
+    regex: 'os\.popen\s*\('
+    rule_id: SEC-022
+    file_extensions: [".py"]
+
+  - name: pickle_loads_python
+    regex: 'pickle\.loads?\s*\('
+    rule_id: SEC-022
+    file_extensions: [".py"]
+
+  - name: pickle_unpickle_python
+    regex: 'pickle\.Unpickler\s*\('
+    rule_id: SEC-022
+    file_extensions: [".py"]
+
+  - name: yaml_unsafe_load
+    regex: 'yaml\.load\s*\([^)]*(?!\bLoader\b)'
+    rule_id: SEC-022
+    file_extensions: [".py"]
+    exclude_patterns: ['yaml\.safe_load', 'Loader\s*=']
+
+  - name: marshal_loads_python
+    regex: 'marshal\.loads?\s*\('
+    rule_id: SEC-022
+    file_extensions: [".py"]
+
+  - name: django_mark_safe
+    regex: 'mark_safe\s*\('
+    rule_id: SEC-022
+    file_extensions: [".py"]
+
+  - name: django_raw_sql
+    regex: '\.raw\s*\(\s*[f"\x27]'
+    rule_id: SEC-020
+    file_extensions: [".py"]
+
+  - name: django_extra_sql
+    regex: '\.extra\s*\('
+    rule_id: SEC-020
+    file_extensions: [".py"]
+
+sql_injection:
+  - name: sql_fstring_python
+    regex: 'f["\x27](?:SELECT|INSERT|UPDATE|DELETE|DROP)\s.*\{.*\}'
+    rule_id: SEC-020
+    file_extensions: [".py"]
+
+  - name: sql_concat_python
+    regex: '(?:SELECT|INSERT|UPDATE|DELETE|DROP)\s.*["'']\s*\+\s*\w'
+    rule_id: SEC-020
+    file_extensions: [".py"]
+
+  - name: sql_concat_js
+    regex: '(?:SELECT|INSERT|UPDATE|DELETE|DROP)\s.*["''`]\s*\+\s*\w'
+    rule_id: SEC-020
+    file_extensions: [".js", ".ts"]
+
+  - name: sql_template_literal
+    regex: '`(?:SELECT|INSERT|UPDATE|DELETE|DROP)\s.*\$\{.*\}`'
+    rule_id: SEC-020
+    file_extensions: [".js", ".ts"]
+
+cors:
+  - name: cors_wildcard
+    regex: 'Access-Control-Allow-Origin.*\*'
+    rule_id: SEC-039
+    file_extensions: ["*"]
+
+  - name: cors_config_wildcard
+    regex: "cors\\(\\s*\\)|origin\\s*:\\s*['\"]\\*['\"]|origin\\s*:\\s*true"
+    rule_id: SEC-039
+    file_extensions: [".js", ".ts"]
+
+source_maps:
+  - name: sourcemap_url
+    regex: 'sourceMappingURL\s*='
+    rule_id: SEC-034
+    file_extensions: [".js", ".css"]
+
+  - name: map_file_reference
+    regex: '\.map["\x27]?\s*$'
+    rule_id: SEC-034
+    file_extensions: [".js", ".css"]
+
+default_credentials:
+  - name: default_admin
+    regex: '(?:username|user)\s*[=:]\s*["\x27]admin["\x27]'
+    rule_id: SEC-018
+    file_extensions: ["*"]
+
+  - name: default_password
+    regex: '(?:password|passwd|pwd)\s*[=:]\s*["\x27](?:admin|password|password123|changeme|default|123456|test)["\x27]'
+    rule_id: SEC-018
+    file_extensions: ["*"]
+
+sensitive_logging:
+  - name: console_log_sensitive
+    regex: 'console\.log\s*\(.*(?:password|token|secret|api_?key|credit.?card|ssn)\b'
+    rule_id: SEC-046
+    file_extensions: [".js", ".ts", ".jsx", ".tsx"]
+
+  - name: print_sensitive_python
+    regex: 'print\s*\(.*(?:password|token|secret|api_?key|credit.?card|ssn)\b'
+    rule_id: SEC-046
+    file_extensions: [".py"]
+
+  - name: logging_sensitive_python
+    regex: 'logging\.(?:info|debug|warning|error)\s*\(.*(?:password|token|secret|api_?key|credit.?card|ssn)\b'
+    rule_id: SEC-046
+    file_extensions: [".py"]
+
+tenant_isolation:
+  - name: django_get_by_param_id
+    regex: '\.objects\.get\s*\(\s*(?:id|pk)\s*=\s*(?:request\.|kwargs|args|pk|id\b)'
+    rule_id: SEC-010
+    file_extensions: [".py"]
+    exclude_patterns: ['filter\s*\(.*user', 'filter\s*\(.*owner', 'filter\s*\(.*tenant', 'request\.user']
+
+  - name: django_filter_no_user
+    regex: '\.objects\.filter\s*\(\s*(?:id|pk)\s*=\s*(?:request\.|kwargs|args)'
+    rule_id: SEC-010
+    file_extensions: [".py"]
+    exclude_patterns: ['user\s*=', 'owner\s*=', 'tenant\s*=', 'request\.user', 'created_by']
+
+  - name: js_findbyid_from_param
+    regex: 'findById\s*\(\s*(?:req\.params|req\.query|req\.body|params|ctx\.params)'
+    rule_id: SEC-010
+    file_extensions: [".js", ".ts"]
+    exclude_patterns: ['user', 'owner', 'userId', 'req\.user']
+
+  - name: js_findone_by_id
+    regex: 'findOne\s*\(\s*\{\s*_?id\s*:\s*(?:req\.params|req\.query|req\.body|params)'
+    rule_id: SEC-010
+    file_extensions: [".js", ".ts"]
+    exclude_patterns: ['user', 'owner', 'userId']
+
+  - name: supabase_select_no_filter
+    regex: '\.from\s*\(["\x27]\w+["\x27]\)\s*\.select\s*\('
+    rule_id: SEC-010
+    file_extensions: [".js", ".ts"]
+    exclude_patterns: ['\.eq\s*\(\s*["\x27]user', '\.eq\s*\(\s*["\x27]owner', '\.eq\s*\(\s*["\x27]tenant', 'rls', 'RLS']
+
+  - name: prisma_findunique_no_user
+    regex: 'prisma\.\w+\.findUnique\s*\(\s*\{\s*where\s*:\s*\{\s*id\s*:'
+    rule_id: SEC-010
+    file_extensions: [".js", ".ts"]
+    exclude_patterns: ['userId', 'user_id', 'ownerId', 'owner_id', 'tenantId']
+
+  - name: sqlalchemy_get_by_id
+    regex: 'session\.(?:get|query).*\.get\s*\(\s*(?:request|id|pk)'
+    rule_id: SEC-010
+    file_extensions: [".py"]
+    exclude_patterns: ['user', 'owner', 'tenant', 'current_user']
+
+secrets_in_frontend:
+  - name: nextpublic_secret
+    regex: 'NEXT_PUBLIC_.*(?:SECRET|KEY|TOKEN|PASSWORD)'
+    rule_id: SEC-033
+    file_extensions: [".js", ".ts", ".jsx", ".tsx", ".env"]

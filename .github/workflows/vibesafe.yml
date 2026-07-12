@@ -1,0 +1,27 @@
+# Example workflow — copy this into your repo's .github/workflows/
+name: VibeSafe Security Scan
+
+on:
+  pull_request:
+    branches: [main, master]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run VibeSafe
+        uses: your-org/vibesafe@main
+        with:
+          path: "."
+          skip-tier3: "true"
+          fail-on-critical: "true"
+          comment-on-pr: "true"
+          # For Tier 3 (LLM) analysis, uncomment:
+          # skip-tier3: "false"
+          # anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}

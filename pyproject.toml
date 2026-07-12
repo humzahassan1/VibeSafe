@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vibesafe"
+version = "0.1.0"
+description = "Security agent for AI-generated (vibecoded) codebases"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic==0.39.0",
+    "pyyaml==6.0.2",
+    "jinja2==3.1.4",
+    "click==8.1.7",
+    "tiktoken==0.8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.3",
+]
+saas = [
+    "fastapi==0.115.5",
+    "uvicorn==0.32.1",
+    "sqlalchemy==2.0.36",
+    "bcrypt==5.0.0",
+    "python-multipart==0.0.19",
+    "stripe==11.3.0",
+    "httpx==0.28.1",
+]
+
+[project.scripts]
+vibesafe = "cli:main"
+
+[tool.setuptools]
+py-modules = ["cli", "orchestrator"]
+
+[tool.setuptools.packages.find]
+include = [
+    "scanner*",
+    "agent*",
+    "models*",
+    "report*",
+    "config*",
+    "utils*",
+    "saas*",
+]
+
+[tool.setuptools.package-data]
+config = ["*.yaml", "prompts/*.txt"]
+report = ["templates/*.jinja"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

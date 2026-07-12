@@ -1,0 +1,132 @@
+name: "VibeSafe Security Scan"
+description: "Scan your codebase for security vulnerabilities with VibeSafe"
+branding:
+  icon: "shield"
+  color: "green"
+
+inputs:
+  path:
+    description: "Path to scan (relative to repo root)"
+    required: false
+    default: "."
+  format:
+    description: "Output format: markdown or json"
+    required: false
+    default: "markdown"
+  skip-tier3:
+    description: "Skip LLM analysis (Tier 1/2 only)"
+    required: false
+    default: "true"
+  anthropic-api-key:
+    description: "Anthropic API key for Tier 3 analysis"
+    required: false
+  budget:
+    description: "Token budget for Tier 3 analysis"
+    required: false
+    default: "100000"
+  fail-on-critical:
+    description: "Fail the action if critical findings are found"
+    required: false
+    default: "true"
+  comment-on-pr:
+    description: "Post findings as a PR comment"
+    required: false
+    default: "true"
+
+outputs:
+  total-findings:
+    description: "Total number of findings"
+  critical-findings:
+    description: "Number of critical findings"
+  report:
+    description: "Path to the generated report file"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install VibeSafe
+      shell: bash
+      run: |
+        pip install -r ${{ github.action_path }}/requirements.txt
+        pip install -e ${{ github.action_path }}
+
+    - name: Run scan
+      id: scan
+      shell: bash
+      env:
+        ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+      run: |
+        ARGS="${{ inputs.path }}"
+
+        if [ "${{ inputs.skip-tier3 }}" = "true" ]; then
+          ARGS="$ARGS --skip-tier3"
+        fi
+
+        ARGS="$ARGS --budget ${{ inputs.budget }}"
+
+        # Generate JSON for parsing
+        vibesafe scan $ARGS -f json -o /tmp/vibesafe-report.json || true
+
+        # Generate markdown for display
+        vibesafe scan $ARGS -f markdown -o /tmp/vibesafe-report.md || true
+
+        # Parse results
+        TOTAL=$(python -c "import json; d=json.load(open('/tmp/vibesafe-report.json')); print(d['summary']['total'])")
+        CRITICAL=$(python -c "import json; d=json.load(open('/tmp/vibesafe-report.json')); print(d['summary']['critical'])")
+
+        echo "total-findings=$TOTAL" >> $GITHUB_OUTPUT
+        echo "critical-findings=$CRITICAL" >> $GITHUB_OUTPUT
+        echo "report=/tmp/vibesafe-report.md" >> $GITHUB_OUTPUT
+
+    - name: Comment on PR
+      if: ${{ inputs.comment-on-pr == 'true' && github.event_name == 'pull_request' }}
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const report = fs.readFileSync('/tmp/vibesafe-report.md', 'utf8');
+          const total = '${{ steps.scan.outputs.total-findings }}';
+          const critical = '${{ steps.scan.outputs.critical-findings }}';
+
+          const marker = '<!-- vibesafe-report -->';
+          const body = `${marker}\n## 🛡️ VibeSafe Security Report\n\n**${total} findings** (${critical} critical)\n\n<details>\n<summary>Full Report</summary>\n\n${report}\n\n</details>`;
+
+          // Find existing comment
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+
+          const existing = comments.find(c => c.body.includes(marker));
+
+          if (existing) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: existing.id,
+              body: body,
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body,
+            });
+          }
+
+    - name: Fail on critical
+      if: ${{ inputs.fail-on-critical == 'true' }}
+      shell: bash
+      run: |
+        CRITICAL=${{ steps.scan.outputs.critical-findings }}
+        if [ "$CRITICAL" -gt 0 ]; then
+          echo "::error::VibeSafe found $CRITICAL critical security issues"
+          exit 1
+        fi

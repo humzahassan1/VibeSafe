@@ -1,0 +1,14 @@
+{
+  "name": "clean-express-app",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node src/index.js",
+    "audit": "npm audit"
+  },
+  "dependencies": {
+    "express": "4.18.2",
+    "helmet": "7.1.0",
+    "cors": "2.8.5",
+    "express-rate-limit": "7.1.4"
+  }
+}

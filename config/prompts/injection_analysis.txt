@@ -1,0 +1,22 @@
+Analyze the following code for injection vulnerabilities beyond simple regex detection.
+
+Focus on:
+- SQL injection via dynamic queries, ORMs with raw queries (SEC-020)
+- NoSQL injection via unsanitized query operators (SEC-021)
+- XSS via unsafe rendering of user input (SEC-022)
+- CSRF on state-changing endpoints without token validation (SEC-023)
+- SSRF via user-controlled URLs in server requests (SEC-024)
+- Path traversal via unsanitized file paths (SEC-025)
+- Insecure file uploads without type/size validation (SEC-026)
+- Missing input validation on user-facing endpoints (SEC-019)
+
+Trace data flow: identify where user input enters and whether it reaches a dangerous sink.
+
+File: {{ file_path }}
+Framework: {{ framework }}
+
+```
+{{ file_content }}
+```
+
+Return a JSON array of findings.

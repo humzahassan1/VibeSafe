@@ -1,0 +1,431 @@
+# VibeSafe Security Rules — 51 checks (SEC-001 through SEC-051)
+# Categories: secrets, database, auth, injection, ai_security, trust_boundary,
+#             infrastructure, monitoring, dependencies, scaling
+
+# ─── Secrets & Credentials (SEC-001 to SEC-006) ───
+
+- id: SEC-001
+  category: secrets
+  severity: critical
+  tier: 1
+  title: Hardcoded API keys
+  description: API keys or tokens are hardcoded in source code instead of loaded from environment variables.
+  frameworks: all
+
+- id: SEC-002
+  category: secrets
+  severity: critical
+  tier: 1
+  title: Exposed .env files
+  description: Environment files containing secrets are committed to version control or accessible publicly.
+  frameworks: all
+
+- id: SEC-003
+  category: secrets
+  severity: warning
+  tier: 2
+  title: Unrestricted API keys
+  description: API keys lack IP, referrer, or scope restrictions, allowing misuse if leaked.
+  frameworks: all
+
+- id: SEC-004
+  category: secrets
+  severity: critical
+  tier: 1
+  title: Leaked database credentials
+  description: Database connection strings with embedded credentials are present in source code.
+  frameworks: all
+
+- id: SEC-005
+  category: secrets
+  severity: warning
+  tier: 2
+  title: Secrets in build logs
+  description: Build scripts or CI config may expose secrets in log output.
+  frameworks: all
+
+- id: SEC-006
+  category: secrets
+  severity: warning
+  tier: 2
+  title: Secrets in error messages
+  description: Error handlers expose sensitive configuration or credentials in responses.
+  frameworks: all
+
+# ─── Database & Permissions (SEC-007 to SEC-010) ───
+
+- id: SEC-007
+  category: database
+  severity: critical
+  tier: 2
+  title: Row-Level Security disabled
+  description: Supabase tables lack RLS policies, allowing any authenticated user to access all rows.
+  frameworks: [nextjs, express]
+
+- id: SEC-008
+  category: database
+  severity: warning
+  tier: 3
+  title: Excessive database permissions
+  description: Application database user has admin or superuser privileges instead of least-privilege access.
+  frameworks: all
+
+- id: SEC-009
+  category: database
+  severity: warning
+  tier: 2
+  title: Misconfigured storage buckets
+  description: Cloud storage buckets (S3, Firebase Storage, Supabase Storage) have overly permissive access rules.
+  frameworks: all
+
+- id: SEC-010
+  category: database
+  severity: critical
+  tier: 1
+  title: Broken tenant isolation
+  description: Multi-tenant data is not properly isolated; users can access other tenants' data.
+  frameworks: all
+
+# ─── Authentication & Access Control (SEC-011 to SEC-018) ───
+
+- id: SEC-011
+  category: auth
+  severity: critical
+  tier: 3
+  title: Missing authentication
+  description: API endpoints or pages that handle sensitive data lack authentication checks.
+  frameworks: all
+
+- id: SEC-012
+  category: auth
+  severity: critical
+  tier: 3
+  title: Missing authorization
+  description: Authenticated users can access resources or perform actions beyond their role or permissions.
+  frameworks: all
+
+- id: SEC-013
+  category: auth
+  severity: critical
+  tier: 3
+  title: IDOR vulnerabilities
+  description: Object references (IDs) are directly exposed and not validated against the requesting user's permissions.
+  frameworks: all
+
+- id: SEC-014
+  category: auth
+  severity: critical
+  tier: 3
+  title: Client-controlled roles
+  description: User roles or permissions are set or trusted from client-side data (cookies, headers, request body).
+  frameworks: all
+
+- id: SEC-015
+  category: auth
+  severity: warning
+  tier: 3
+  title: Broken password resets
+  description: Password reset flow has vulnerabilities such as predictable tokens, no expiry, or token reuse.
+  frameworks: all
+
+- id: SEC-016
+  category: auth
+  severity: warning
+  tier: 3
+  title: Weak session management
+  description: Sessions lack secure flags, have excessive lifetimes, or are not invalidated on logout.
+  frameworks: all
+
+- id: SEC-017
+  category: auth
+  severity: critical
+  tier: 2
+  title: Weak JWT secrets
+  description: JWT signing uses weak or default secrets, or uses none algorithm.
+  frameworks: all
+
+- id: SEC-018
+  category: auth
+  severity: warning
+  tier: 1
+  title: Default credentials
+  description: Default usernames and passwords (admin/admin, password123) are present in code or config.
+  frameworks: all
+
+# ─── Input Validation & Injection (SEC-019 to SEC-026) ───
+
+- id: SEC-019
+  category: injection
+  severity: warning
+  tier: 3
+  title: No input validation
+  description: User input is accepted without validation or sanitization before processing.
+  frameworks: all
+
+- id: SEC-020
+  category: injection
+  severity: critical
+  tier: 1
+  title: SQL injection
+  description: User input is concatenated into SQL queries instead of using parameterized queries.
+  frameworks: all
+
+- id: SEC-021
+  category: injection
+  severity: critical
+  tier: 3
+  title: NoSQL injection
+  description: User input is passed directly into NoSQL query operators without sanitization.
+  frameworks: all
+
+- id: SEC-022
+  category: injection
+  severity: critical
+  tier: 1
+  title: Cross-site scripting (XSS)
+  description: User input is rendered in HTML without escaping, enabling script injection.
+  frameworks: all
+
+- id: SEC-023
+  category: injection
+  severity: warning
+  tier: 3
+  title: Cross-site request forgery (CSRF)
+  description: State-changing endpoints lack CSRF token validation.
+  frameworks: all
+
+- id: SEC-024
+  category: injection
+  severity: critical
+  tier: 3
+  title: Server-side request forgery (SSRF)
+  description: User-controlled URLs are used in server-side requests without validation.
+  frameworks: all
+
+- id: SEC-025
+  category: injection
+  severity: critical
+  tier: 3
+  title: Path traversal
+  description: User input is used in file paths without sanitization, allowing access to arbitrary files.
+  frameworks: all
+
+- id: SEC-026
+  category: injection
+  severity: warning
+  tier: 3
+  title: Insecure file uploads
+  description: File uploads lack type validation, size limits, or are stored in accessible locations.
+  frameworks: all
+
+# ─── AI-Specific Security (SEC-027 to SEC-030) ───
+
+- id: SEC-027
+  category: ai_security
+  severity: critical
+  tier: 3
+  title: Prompt injection
+  description: User input is passed directly into LLM prompts without sanitization or boundary enforcement.
+  frameworks: all
+
+- id: SEC-028
+  category: ai_security
+  severity: warning
+  tier: 3
+  title: Missing rate limiting on AI endpoints
+  description: AI-powered endpoints lack rate limiting, enabling abuse and cost runaway.
+  frameworks: all
+
+- id: SEC-029
+  category: ai_security
+  severity: warning
+  tier: 3
+  title: Exposed AI errors
+  description: AI/LLM error messages or internal prompts are leaked to end users.
+  frameworks: all
+
+- id: SEC-030
+  category: ai_security
+  severity: critical
+  tier: 3
+  title: Ungated AI tool actions
+  description: AI agents can perform destructive actions (delete, send, pay) without user confirmation.
+  frameworks: all
+
+# ─── Frontend vs. Backend Trust Boundary (SEC-031 to SEC-034) ───
+
+- id: SEC-031
+  category: trust_boundary
+  severity: critical
+  tier: 3
+  title: Client-side-only security
+  description: Security checks (auth, permissions, validation) are enforced only in frontend code with no server-side validation.
+  frameworks: all
+
+- id: SEC-032
+  category: trust_boundary
+  severity: critical
+  tier: 3
+  title: Frontend-only payment validation
+  description: Payment amounts, pricing, or discounts are validated only on the client side.
+  frameworks: all
+
+- id: SEC-033
+  category: trust_boundary
+  severity: critical
+  tier: 1
+  title: Secrets in frontend JS
+  description: API keys, tokens, or secrets are embedded in client-side JavaScript bundles.
+  frameworks: all
+
+- id: SEC-034
+  category: trust_boundary
+  severity: warning
+  tier: 1
+  title: Exposed source maps
+  description: Source maps are deployed to production, exposing original source code.
+  frameworks: all
+
+# ─── Infrastructure & Deployment (SEC-035 to SEC-042) ───
+
+- id: SEC-035
+  category: infrastructure
+  severity: critical
+  tier: 3
+  title: Unprotected admin routes
+  description: Admin panels or management endpoints lack authentication or IP restrictions.
+  frameworks: all
+
+- id: SEC-036
+  category: infrastructure
+  severity: warning
+  tier: 2
+  title: Debug pages in production
+  description: Debug endpoints, stack traces, or development tools are accessible in production builds.
+  frameworks: all
+
+- id: SEC-037
+  category: infrastructure
+  severity: warning
+  tier: 2
+  title: Public staging environments
+  description: Staging or development environments are publicly accessible without authentication.
+  frameworks: all
+
+- id: SEC-038
+  category: infrastructure
+  severity: warning
+  tier: 2
+  title: Missing security headers
+  description: HTTP security headers (CSP, X-Frame-Options, HSTS, X-Content-Type-Options) are missing.
+  frameworks: all
+
+- id: SEC-039
+  category: infrastructure
+  severity: warning
+  tier: 1
+  title: Permissive CORS
+  description: CORS policy allows all origins (Access-Control-Allow-Origin *) enabling cross-origin attacks.
+  frameworks: all
+
+- id: SEC-040
+  category: infrastructure
+  severity: warning
+  tier: 3
+  title: Unverified webhooks
+  description: Incoming webhooks are processed without verifying their signature or origin.
+  frameworks: all
+
+- id: SEC-041
+  category: infrastructure
+  severity: warning
+  tier: 2
+  title: Missing encryption
+  description: Data in transit or at rest lacks encryption (HTTP instead of HTTPS, unencrypted database).
+  frameworks: all
+
+- id: SEC-042
+  category: infrastructure
+  severity: warning
+  tier: 3
+  title: Exposed internal dashboards
+  description: Internal monitoring, metrics, or admin dashboards are publicly accessible.
+  frameworks: all
+
+# ─── Monitoring, Logging & Recovery (SEC-043 to SEC-046) ───
+
+- id: SEC-043
+  category: monitoring
+  severity: info
+  tier: 3
+  title: No audit logs
+  description: Security-relevant events (login, permission changes, data access) are not logged.
+  frameworks: all
+
+- id: SEC-044
+  category: monitoring
+  severity: info
+  tier: 3
+  title: No monitoring or alerting
+  description: Application lacks error monitoring, uptime checks, or alerting for security events.
+  frameworks: all
+
+- id: SEC-045
+  category: monitoring
+  severity: info
+  tier: 3
+  title: No backup plan
+  description: No database backup strategy or disaster recovery plan is in place.
+  frameworks: all
+
+- id: SEC-046
+  category: monitoring
+  severity: warning
+  tier: 1
+  title: Sensitive data in logs
+  description: Log statements output passwords, tokens, PII, or other sensitive data.
+  frameworks: all
+
+# ─── Dependency & Code Hygiene (SEC-047 to SEC-050) ───
+
+- id: SEC-047
+  category: dependencies
+  severity: warning
+  tier: 2
+  title: Unaudited dependencies
+  description: No dependency audit tool (npm audit, pip-audit) is configured or run regularly.
+  frameworks: all
+
+- id: SEC-048
+  category: dependencies
+  severity: warning
+  tier: 2
+  title: Outdated packages
+  description: Dependencies have known vulnerabilities or are significantly behind current versions.
+  frameworks: all
+
+- id: SEC-049
+  category: dependencies
+  severity: warning
+  tier: 2
+  title: Supply-chain risk
+  description: Dependencies are unpinned or use overly broad version ranges, risking supply-chain attacks.
+  frameworks: all
+
+- id: SEC-050
+  category: dependencies
+  severity: info
+  tier: 3
+  title: Unreviewed AI-generated code
+  description: Code appears to be AI-generated (common patterns) and lacks review markers or comments.
+  frameworks: all
+
+# ─── Scaling (SEC-051) ───
+
+- id: SEC-051
+  category: scaling
+  severity: info
+  tier: 3
+  title: Sequential request handling
+  description: Request handlers use synchronous/blocking patterns that will fail under concurrent load.
+  frameworks: all

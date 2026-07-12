@@ -1,0 +1,21 @@
+Analyze the following code for cross-file data flow security issues.
+
+Trace how data moves through the application:
+- Where does user input enter? (request params, body, headers, cookies, query strings)
+- Is it validated or sanitized before use?
+- Does it reach any dangerous sinks? (database queries, file operations, HTML rendering, shell commands, HTTP requests)
+- Are there trust boundary violations? (client data trusted on server, frontend-only validation)
+
+Check for:
+- Client-side-only security checks with no server validation (SEC-031)
+- Frontend-only payment validation (SEC-032)
+- Unverified webhook payloads (SEC-040)
+
+File: {{ file_path }}
+Framework: {{ framework }}
+
+```
+{{ file_content }}
+```
+
+Return a JSON array of findings. Use investigate_further to flag files that receive data from this one.

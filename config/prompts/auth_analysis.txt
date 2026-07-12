@@ -1,0 +1,19 @@
+Analyze the following code for authentication and authorization vulnerabilities.
+
+Focus on:
+- Missing authentication on endpoints that handle sensitive data (SEC-011)
+- Missing authorization checks — can any authenticated user access admin resources? (SEC-012)
+- IDOR vulnerabilities — are object IDs validated against the requesting user? (SEC-013)
+- Client-controlled roles — are roles/permissions trusted from client data? (SEC-014)
+- Broken password reset flows — predictable tokens, no expiry? (SEC-015)
+- Weak session management — missing secure/httpOnly flags, no logout invalidation? (SEC-016)
+- Weak JWT secrets or use of "none" algorithm (SEC-017)
+
+File: {{ file_path }}
+Framework: {{ framework }}
+
+```
+{{ file_content }}
+```
+
+Return a JSON array of findings. Include investigate_further paths for related files to check.

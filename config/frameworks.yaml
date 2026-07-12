@@ -1,0 +1,222 @@
+# Framework detection signatures for Next.js and Express.
+
+frameworks:
+  nextjs:
+    display_name: Next.js
+    language: javascript
+
+    file_markers:
+      - next.config.js
+      - next.config.ts
+      - next.config.mjs
+
+    package_dependencies:
+      - next
+
+    directory_markers:
+      - pages/api
+      - app/api
+      - pages
+      - app
+
+    config_files:
+      - next.config.js
+      - next.config.ts
+      - next.config.mjs
+      - middleware.ts
+      - middleware.js
+
+    high_risk_patterns:
+      - "pages/api/**"
+      - "app/api/**"
+      - "app/**/route.ts"
+      - "app/**/route.js"
+      - "middleware.ts"
+      - "middleware.js"
+      - "lib/auth*"
+      - "lib/db*"
+      - "lib/supabase*"
+      - "lib/firebase*"
+      - "utils/auth*"
+
+    security_config_paths:
+      - next.config.js
+      - next.config.ts
+      - .env.local
+      - .env.production
+
+  express:
+    display_name: Express
+    language: javascript
+
+    file_markers: []
+
+    package_dependencies:
+      - express
+
+    directory_markers:
+      - routes
+      - middleware
+
+    config_files:
+      - app.js
+      - server.js
+      - index.js
+
+    high_risk_patterns:
+      - "routes/**"
+      - "middleware/**"
+      - "controllers/**"
+      - "auth/**"
+      - "models/**"
+      - "db/**"
+      - "config/database*"
+      - "app.js"
+      - "server.js"
+
+    security_config_paths:
+      - app.js
+      - server.js
+      - config/cors*
+      - config/security*
+
+  django:
+    display_name: Django
+    language: python
+
+    file_markers:
+      - manage.py
+
+    package_dependencies:
+      - django
+
+    directory_markers:
+      - templates
+      - static
+      - migrations
+
+    config_files:
+      - settings.py
+      - urls.py
+      - wsgi.py
+      - asgi.py
+
+    high_risk_patterns:
+      - "**/views.py"
+      - "**/urls.py"
+      - "**/settings.py"
+      - "**/settings/**"
+      - "**/models.py"
+      - "**/forms.py"
+      - "**/serializers.py"
+      - "**/admin.py"
+      - "**/middleware.py"
+      - "**/auth*"
+      - "**/api/**"
+
+    security_config_paths:
+      - settings.py
+      - "**/settings/*.py"
+      - .env
+
+  flask:
+    display_name: Flask
+    language: python
+
+    file_markers: []
+
+    package_dependencies:
+      - flask
+
+    directory_markers:
+      - templates
+      - static
+
+    config_files:
+      - app.py
+      - config.py
+      - wsgi.py
+
+    high_risk_patterns:
+      - "app.py"
+      - "**/views.py"
+      - "**/routes.py"
+      - "**/auth*"
+      - "**/api/**"
+      - "**/models.py"
+      - "config.py"
+
+    security_config_paths:
+      - app.py
+      - config.py
+      - .env
+
+  fastapi:
+    display_name: FastAPI
+    language: python
+
+    file_markers: []
+
+    package_dependencies:
+      - fastapi
+
+    directory_markers:
+      - routers
+      - schemas
+
+    config_files:
+      - main.py
+      - app.py
+      - config.py
+
+    high_risk_patterns:
+      - "main.py"
+      - "**/routers/**"
+      - "**/routes/**"
+      - "**/api/**"
+      - "**/auth*"
+      - "**/models.py"
+      - "**/schemas/**"
+      - "**/dependencies.py"
+
+    security_config_paths:
+      - main.py
+      - config.py
+      - .env
+
+  generic:
+    display_name: Generic
+    language: unknown
+
+    file_markers: []
+    package_dependencies: []
+    directory_markers: []
+
+    config_files: []
+
+    high_risk_patterns:
+      - "**/auth*"
+      - "**/login*"
+      - "**/middleware*"
+      - "**/routes*"
+      - "**/api*"
+      - "**/db*"
+      - "**/models*"
+
+    security_config_paths: []
+
+# Default directories to ignore during scanning
+ignore_directories:
+  - node_modules
+  - .git
+  - __pycache__
+  - .next
+  - dist
+  - build
+  - venv
+  - .venv
+  - coverage
+  - .cache
+  - .tox
+  - .mypy_cache
+  - .pytest_cache

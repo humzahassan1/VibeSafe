@@ -1,0 +1,18 @@
+Analyze the following code for scalability and concurrency issues that could cause denial of service or data corruption under load.
+
+Focus on:
+- Synchronous/blocking handlers that will fail under concurrent requests (SEC-051)
+- Missing async/await on I/O operations
+- Sequential processing where concurrent processing is needed
+- Race conditions in shared state
+- Missing connection pooling for databases
+- Unbounded queues or memory growth
+
+File: {{ file_path }}
+Framework: {{ framework }}
+
+```
+{{ file_content }}
+```
+
+Return a JSON array of findings.
