@@ -33,3 +33,7 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
+
+# Node / landing page
+node_modules/
+landing/dist/
