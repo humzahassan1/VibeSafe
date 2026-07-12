@@ -198,4 +198,5 @@ vibesafe/
     formatter.py       # Markdown/JSON output
     templates/         # Report templates
   utils/               # File I/O, logging, git, token counting
+  landing/             # React product landing page (Vite + Tailwind)
 ```
