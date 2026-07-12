@@ -28,3 +28,13 @@ npm run preview
 ```
 
 Output is written to `landing/dist/`.
+
+## Deploy on Vercel
+
+The repo root `vercel.json` builds this app automatically. Connect the GitHub repo
+in Vercel — no extra settings needed. Vercel will run `npm install` and `npm run build`
+inside `landing/` and serve `landing/dist`.
+
+> **Note:** The Python scanner and FastAPI SaaS (`saas/app.py`) are separate from this
+> static landing page. Do not point Vercel at the FastAPI entrypoint unless you intend
+> to deploy the SaaS API as a serverless backend.
