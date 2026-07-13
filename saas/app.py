@@ -65,7 +65,7 @@ app = FastAPI(title="VibeSafe", version="0.1.0", lifespan=_lifespan)
 
 _cors_origins = os.environ.get(
     "VIBESAFE_CORS_ORIGINS",
-    "http://localhost:5173,http://127.0.0.1:5173",
+    "http://localhost:5173,http://127.0.0.1:5173,https://vibe-safe-pt7v.vercel.app,https://vibesafe.vercel.app",
 ).split(",")
 
 app.add_middleware(

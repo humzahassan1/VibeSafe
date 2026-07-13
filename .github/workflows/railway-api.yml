@@ -1,0 +1,35 @@
+name: Deploy API to Railway
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'saas/**'
+      - 'scanner/**'
+      - 'agent/**'
+      - 'models/**'
+      - 'report/**'
+      - 'utils/**'
+      - 'config/**'
+      - 'orchestrator.py'
+      - 'requirements.txt'
+      - 'pyproject.toml'
+      - 'Dockerfile.api'
+      - 'railway.toml'
+      - '.github/workflows/railway-api.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.RAILWAY_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: curl -fsSL https://railway.com/install.sh | sh
+
+      - name: Deploy to Railway
+        run: ~/.railway/bin/railway up --detach --ci
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

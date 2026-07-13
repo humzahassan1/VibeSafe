@@ -1,9 +1,21 @@
 import type { ScanReport } from '../types/scan'
+import { PRODUCTION_API_URL } from './constants'
 
-const API_BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? ''
+function resolveApiBase(): string {
+  const fromEnv = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '')
+  if (fromEnv) return fromEnv
+  if (import.meta.env.PROD && PRODUCTION_API_URL) return PRODUCTION_API_URL
+  return ''
+}
+
+const API_BASE = resolveApiBase()
 
 export function apiUrl(path: string): string {
   return `${API_BASE}${path}`
+}
+
+export function getApiBase(): string {
+  return API_BASE
 }
 
 export async function scanZip(file: File, name: string): Promise<ScanReport> {
