@@ -17,6 +17,7 @@ from fastapi import (
     UploadFile,
     status,
 )
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -38,6 +39,7 @@ from saas.billing import (
 )
 from saas.config import load_settings, stripe_enabled
 from saas.database import ApiKey, Scan, User, get_session, init_db
+from saas.demo import DemoScanError, run_demo_scan_archive, run_demo_scan_github
 from saas.scans import ScanError, run_scan_from_archive
 from saas.usage import can_run_scan, get_usage_status
 from saas.web import render_dashboard, render_landing
@@ -60,6 +62,19 @@ async def _lifespan(_app: FastAPI):
 
 
 app = FastAPI(title="VibeSafe", version="0.1.0", lifespan=_lifespan)
+
+_cors_origins = os.environ.get(
+    "VIBESAFE_CORS_ORIGINS",
+    "http://localhost:5173,http://127.0.0.1:5173",
+).split(",")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[origin.strip() for origin in _cors_origins if origin.strip()],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # ─────────────────────────── Auth ───────────────────────────
@@ -250,6 +265,72 @@ def revoke_key(
     session.add(api_key)
     session.commit()
     return {"status": "revoked", "id": key_id}
+
+
+# ─────────────────────────── Public demo scans ───────────────────────────
+
+
+@app.post("/api/demo/scan")
+async def demo_scan_zip(
+    project: UploadFile = File(...),
+    name: str = Form("project"),
+) -> JSONResponse:
+    """Run a Tier 1 + 2 demo scan on an uploaded zip — no auth required.
+
+    Args:
+        project: The uploaded zip archive.
+        name: Display name (unused in demo, kept for form parity).
+
+    Returns:
+        Full scan report JSON.
+    """
+    del name
+    max_bytes = _settings.max_upload_mb * 1024 * 1024
+    tmp_fd, tmp_path = tempfile.mkstemp(suffix=".zip", prefix="vibesafe_demo_")
+    try:
+        size = 0
+        with os.fdopen(tmp_fd, "wb") as out:
+            while chunk := await project.read(1024 * 1024):
+                size += len(chunk)
+                if size > max_bytes:
+                    raise HTTPException(
+                        status_code=413,
+                        detail=f"Upload exceeds {_settings.max_upload_mb} MB limit.",
+                    )
+                out.write(chunk)
+
+        try:
+            report = run_demo_scan_archive(tmp_path)
+        except DemoScanError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
+    return JSONResponse(report)
+
+
+@app.post("/api/demo/scan/github")
+async def demo_scan_github(
+    repo: str = Form(...),
+    github_token: str = Form(""),
+) -> JSONResponse:
+    """Run a Tier 1 + 2 demo scan on a GitHub repository — no auth required.
+
+    Args:
+        repo: Repository slug or URL.
+        github_token: Optional token for private repos.
+
+    Returns:
+        Full scan report JSON.
+    """
+    token = github_token.strip() or os.environ.get("GITHUB_TOKEN")
+    try:
+        report = run_demo_scan_github(repo.strip(), token=token)
+    except DemoScanError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    return JSONResponse(report)
 
 
 # ─────────────────────────── Scans ───────────────────────────
