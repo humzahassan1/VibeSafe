@@ -9,7 +9,7 @@ export const PYPI_URL = 'https://pypi.org/project/vibesafe/'
  * Fallback production API URL when VITE_API_URL is not set at build time.
  * Update after Railway deploy, or set VITE_API_URL in Vercel env (preferred).
  */
-export const PRODUCTION_API_URL = ''
+export const PRODUCTION_API_URL = 'https://vibesafe-production-1044.up.railway.app'
 
 export const NAV_LINKS = [
   { label: 'Features', href: '#features' },
