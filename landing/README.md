@@ -7,7 +7,7 @@ Dark single-page product landing for [VibeSafe](../README.md).
 - React 19 + Vite + TypeScript
 - Tailwind CSS v4
 - GSAP (ScrollTrigger, marquee)
-- Framer Motion (loading screen, scroll reveals)
+- Framer Motion (scroll reveals)
 - hls.js (background video)
 
 ## Development
