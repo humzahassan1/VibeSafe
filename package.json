@@ -1,0 +1,9 @@
+{
+  "name": "vibesafe",
+  "private": true,
+  "description": "VibeSafe monorepo — landing page build root for Vercel",
+  "scripts": {
+    "build": "npm run build --prefix landing",
+    "install:landing": "npm install --prefix landing"
+  }
+}
