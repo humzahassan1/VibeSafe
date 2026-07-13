@@ -1,6 +1,7 @@
 import gsap from 'gsap'
 import { useEffect, useState } from 'react'
-import { DOCS_URL, GITHUB_URL, HLS_VIDEO_URL } from '../lib/constants'
+import { Link } from 'react-router-dom'
+import { GITHUB_URL, HLS_VIDEO_URL } from '../lib/constants'
 import { useHlsVideo } from '../hooks/useHlsVideo'
 import { Navbar } from './Navbar'
 
@@ -84,17 +85,15 @@ export function Hero({ activeSection }: HeroProps) {
         </p>
 
         <div className="blur-in inline-flex flex-wrap justify-center gap-4">
-          <a
-            href={DOCS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            to="/scan"
             className="group relative rounded-full bg-text-primary px-7 py-3.5 text-sm text-bg transition-transform hover:scale-105"
           >
             <span className="absolute inset-[-2px] rounded-full opacity-0 accent-gradient transition-opacity group-hover:opacity-100" />
             <span className="relative rounded-full px-1 group-hover:bg-bg group-hover:text-text-primary">
               Start Scanning
             </span>
-          </a>
+          </Link>
           <a
             href={GITHUB_URL}
             target="_blank"

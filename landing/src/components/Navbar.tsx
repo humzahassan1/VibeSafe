@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { GITHUB_URL, NAV_LINKS } from '../lib/constants'
+import { Link } from 'react-router-dom'
+import { NAV_LINKS } from '../lib/constants'
 
 interface NavbarProps {
   activeSection?: string
@@ -60,17 +61,24 @@ export function Navbar({ activeSection }: NavbarProps) {
 
         <div className="mx-1 hidden h-5 w-px bg-stroke sm:block" />
 
-        <a
-          href={GITHUB_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          to="/scan"
+          className="rounded-full px-3 py-1.5 text-xs text-muted transition-colors hover:bg-stroke/50 hover:text-text-primary sm:px-4 sm:py-2 sm:text-sm"
+        >
+          Scan
+        </Link>
+
+        <div className="mx-1 hidden h-5 w-px bg-stroke sm:block" />
+
+        <Link
+          to="/scan"
           className="group relative rounded-full px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm"
         >
           <span className="absolute inset-[-2px] rounded-full opacity-0 accent-gradient transition-opacity group-hover:opacity-100" />
           <span className="relative flex items-center gap-1 rounded-full bg-surface px-2 py-0.5 backdrop-blur-md text-text-primary">
             Get Started <span aria-hidden>→</span>
           </span>
-        </a>
+        </Link>
       </div>
     </nav>
   )

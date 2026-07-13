@@ -1,7 +1,7 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useEffect, useRef } from 'react'
-import { GITHUB_URL } from '../lib/constants'
+import { Link } from 'react-router-dom'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -136,17 +136,15 @@ export function TerminalPreview() {
         <p className="mb-8 max-w-md text-sm text-muted md:text-base">
           Watch VibeSafe audit a vulnerable Express app in seconds.
         </p>
-        <a
-          href={GITHUB_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          to="/scan"
           className="group relative rounded-full px-7 py-3.5 text-sm text-text-primary transition-transform hover:scale-105"
         >
           <span className="absolute inset-[-2px] rounded-full opacity-0 accent-gradient transition-opacity group-hover:opacity-100" />
           <span className="relative rounded-full border border-stroke bg-surface px-4 py-2">
             Try it yourself →
           </span>
-        </a>
+        </Link>
       </div>
 
       <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-6">

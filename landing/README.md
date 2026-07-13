@@ -20,6 +20,28 @@ npm run dev
 
 Open http://localhost:5173
 
+### Live scan demo (`/scan`)
+
+The scan page calls the FastAPI backend for Tier 1 + 2 analysis.
+
+**Terminal 1 — API:**
+```bash
+cd ..  # repo root
+pip install -e ".[saas]"
+uvicorn saas.app:app --reload
+```
+
+**Terminal 2 — landing:**
+```bash
+npm run dev
+```
+
+Visit http://localhost:5173/scan — paste a GitHub URL or upload a zip.
+
+For production, deploy the API separately and set `VITE_API_URL` in Vercel
+(e.g. `https://your-api.railway.app`). Add your landing origin to
+`VIBESAFE_CORS_ORIGINS` on the API.
+
 ## Production build
 
 ```bash
