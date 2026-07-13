@@ -53,7 +53,8 @@ Output is written to `landing/dist/`.
 
 ## Deploy on Vercel
 
-### Recommended (most reliable)
+See **[RAILWAY.md](../RAILWAY.md)** for deploying the FastAPI backend to Railway
+(required for `/scan` to work in production).
 
 In Vercel → **Project Settings → General → Root Directory**, set:
 

@@ -4,7 +4,7 @@ import { FindingsPanel } from '../components/scan/FindingsPanel'
 import { ScanInput } from '../components/scan/ScanInput'
 import { ScanTerminal } from '../components/scan/ScanTerminal'
 import { Navbar } from '../components/Navbar'
-import { isApiConfigured, scanGithub, scanZip } from '../lib/api'
+import { getApiBase, isApiConfigured, scanGithub, scanZip } from '../lib/api'
 import { formatTime, SCAN_PHASES } from '../lib/scanLogs'
 import type { ScanReport, TerminalLine } from '../types/scan'
 
@@ -90,7 +90,13 @@ export function Scan() {
     clearTimers()
     const message = err instanceof Error ? err.message : 'Scan failed'
     pushLine(setLines, 'error', message)
-    if (!isApiConfigured()) {
+    if (!getApiBase() && import.meta.env.PROD) {
+      pushLine(
+        setLines,
+        'info',
+        'Set VITE_API_URL in Vercel to your Railway API URL, then redeploy.',
+      )
+    } else if (!isApiConfigured()) {
       pushLine(
         setLines,
         'info',
