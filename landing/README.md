@@ -31,10 +31,22 @@ Output is written to `landing/dist/`.
 
 ## Deploy on Vercel
 
-The repo root `vercel.json` builds this app automatically. Connect the GitHub repo
-in Vercel — no extra settings needed. Vercel will run `npm install` and `npm run build`
-inside `landing/` and serve `landing/dist`.
+### Recommended (most reliable)
 
-> **Note:** The Python scanner and FastAPI SaaS (`saas/app.py`) are separate from this
-> static landing page. Do not point Vercel at the FastAPI entrypoint unless you intend
-> to deploy the SaaS API as a serverless backend.
+In Vercel → **Project Settings → General → Root Directory**, set:
+
+```
+landing
+```
+
+Then redeploy. Vercel will only see the Vite app and will not try to deploy Python/FastAPI.
+
+### Alternative (repo root)
+
+The repo root `vercel.json` + `package.json` also build `landing/` as a static site.
+If you still see a FastAPI entrypoint error, use the **Root Directory** setting above —
+the Python scanner (`pyproject.toml`, `requirements.txt`) lives at the repo root and can
+cause Vercel to mis-detect the project.
+
+> **Note:** The FastAPI SaaS (`saas/app.py`) is a separate backend. Do not deploy it
+> from this project unless you intend to run the API on Vercel serverless.
