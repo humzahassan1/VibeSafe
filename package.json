@@ -4,6 +4,7 @@
   "description": "VibeSafe monorepo — landing page build root for Vercel",
   "scripts": {
     "build": "npm run build --prefix landing",
-    "install:landing": "npm install --prefix landing"
+    "install:landing": "npm install --prefix landing",
+    "audit": "npm audit --prefix landing"
   }
 }
