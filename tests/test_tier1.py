@@ -234,3 +234,24 @@ app.listen(port);
         findings = _scan_snippet(clean_content, config)
         critical = [f for f in findings if f.severity == Severity.CRITICAL]
         assert len(critical) == 0
+
+
+class TestRuleDefinitionExclusions:
+    def test_skips_scanner_rule_metadata_files(self, config) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            config_dir = os.path.join(tmp, "config")
+            os.makedirs(config_dir)
+
+            patterns_path = os.path.join(config_dir, "patterns.yaml")
+            with open(patterns_path, "w", encoding="utf-8") as f:
+                f.write("  - regex: 'Access-Control-Allow-Origin.*\\*'\n")
+
+            rules_path = os.path.join(config_dir, "rules.yaml")
+            with open(rules_path, "w", encoding="utf-8") as f:
+                f.write(
+                    "  description: CORS policy allows all origins "
+                    "(Access-Control-Allow-Origin *) enabling cross-origin attacks.\n"
+                )
+
+            assert _scan_file_patterns(patterns_path, config.patterns, config.rules) == []
+            assert _scan_file_patterns(rules_path, config.patterns, config.rules) == []

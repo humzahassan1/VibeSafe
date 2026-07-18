@@ -22,6 +22,12 @@ _SEVERITY_MAP = {
     "info": Severity.INFO,
 }
 
+# Scanner rule/pattern metadata — not application code; matching here causes self-scan noise.
+_RULE_DEFINITION_SUFFIXES = (
+    "/config/patterns.yaml",
+    "/config/rules.yaml",
+)
+
 
 def scan_tier1(
     context: ProjectContext,
@@ -60,6 +66,12 @@ def scan_tier1(
     return findings
 
 
+def _is_rule_definition_file(file_path: str) -> bool:
+    """Return True when a file holds scanner rule metadata, not app source code."""
+    normalized = file_path.replace("\\", "/")
+    return any(normalized.endswith(suffix) for suffix in _RULE_DEFINITION_SUFFIXES)
+
+
 def _scan_file_patterns(
     file_path: str,
     patterns: dict[str, list[CompiledPattern]],
@@ -75,6 +87,9 @@ def _scan_file_patterns(
     Returns:
         List of findings from pattern matches.
     """
+    if _is_rule_definition_file(file_path):
+        return []
+
     content = read_file_safe(file_path)
     if content is None:
         return []
